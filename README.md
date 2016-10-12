@@ -1,2 +1,2 @@
-# medis
-redis on mesos
+# Medis 
+Medis is Mesos Framework for Redis.

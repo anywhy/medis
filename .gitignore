@@ -1,0 +1,15 @@
+###IntelliJ###
+
+*.iml
+*.ipr
+*.iws
+.idea/
+
+*.log
+*.swp
+*.out
+*.dump
+*.log.*
+
+.DS_Store
+.htaccess

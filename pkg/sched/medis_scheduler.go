@@ -2,14 +2,21 @@ package sched
 
 import (
 	"github.com/anywhy/medis/pkg/utils/log"
+	res "github.com/anywhy/medis/pkg/utils/res"
 	mesos "github.com/mesos/mesos-go/mesosproto"
 	sched "github.com/mesos/mesos-go/scheduler"
 )
 
 type MedisScheduler struct {
-
+	executor *mesos.ExecutorInfo
 }
 
+func NewMedisScheduler(exec *mesos.ExecutorInfo) (*MedisScheduler, error) {
+
+	return &MedisScheduler{
+		executor: exec,
+	}, nil
+}
 
 /*
  * Invoked when the scheduler successfully registers with a Mesos
@@ -55,7 +62,17 @@ func (sched *MedisScheduler) Disconnected(driver sched.SchedulerDriver) {
  * fail with a TASK_LOST status and a message saying as much).
  */
 func (sched *MedisScheduler) ResourceOffers(driver sched.SchedulerDriver, offers[] *mesos.Offer) {
-
+	res.LogOffers(offers)
+	//for _, offer := range offers {
+	//	driver.LaunchTasks([]*mesos.OfferID{offer.Id}, []*mesos.TaskInfo{{
+	//				Name: proto.String("test"),
+	//				TaskId: &mesos.TaskID{Value: proto.String("1")},
+	//				Command: &mesos.CommandInfo{
+	//					Value: proto.String("echo 'Hello Medis'"),
+	//				},
+	//				SlaveId: offer.SlaveId,
+	//			}}, &mesos.Filters{})
+	//}
 }
 
 /*
@@ -107,7 +124,7 @@ func (sched *MedisScheduler) FrameworkMessage(s sched.SchedulerDriver, eid *meso
  * scheduler to be dropped, this callback may not be invoked.
  */
 func (sched *MedisScheduler) SlaveLost(s sched.SchedulerDriver, id *mesos.SlaveID) {
-	log.ErrorErrorf("Slave '%v' lost", *id)
+	log.Errorf("Slave '%v' lost", *id)
 }
 
 /*
@@ -120,7 +137,7 @@ func (sched *MedisScheduler) SlaveLost(s sched.SchedulerDriver, id *mesos.SlaveI
  * scheduler to be dropped, this callback may not be invoked.
  */
 func (sched *MedisScheduler) ExecutorLost(s sched.SchedulerDriver, eid *mesos.ExecutorID, sid *mesos.SlaveID, code int) {
-	log.ErrorErrorf("Executor %q lost on slave %q code %d", eid, sid, code)
+	log.Errorf("Executor %q lost on slave %q code %d", eid, sid, code)
 }
 
 /*
@@ -129,5 +146,5 @@ func (sched *MedisScheduler) ExecutorLost(s sched.SchedulerDriver, eid *mesos.Ex
  * callback.
  */
 func (sched *MedisScheduler) Error(driver sched.SchedulerDriver, err string) {
-	log.ErrorErrorf("MedisScheduler received error: %v", err)
+	log.Errorf("MedisScheduler received error: %v", err)
 }

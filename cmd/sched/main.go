@@ -8,7 +8,6 @@ import (
 	mesos "github.com/mesos/mesos-go/mesosproto"
 	sched "github.com/mesos/mesos-go/scheduler"
 	"github.com/anywhy/medis/pkg/utils/log"
-	"github.com/anywhy/medis/pkg/core/worker"
 )
 
 func main() {
@@ -20,7 +19,7 @@ func main() {
 		Checkpoint: proto.Bool(true),
 	}
 
-	scheduler, _ := NewMedisScheduler(&worker.TaskWorker{})
+	scheduler, _ := NewMedisScheduler()
 
 	// Scheduler Driver
 	config := sched.DriverConfig{

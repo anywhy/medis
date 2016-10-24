@@ -6,30 +6,49 @@ import (
 	"sync"
 	"github.com/anywhy/medis/pkg/utils/log"
 	"github.com/anywhy/medis/pkg/core/task/queue"
+	"github.com/anywhy/medis/pkg/core/task"
 )
 
-type TaskLanucher interface {
+type Lanucher interface {
 	ProcessOffer(driver sched.SchedulerDriver, offers[] *mesos.Offer)
 }
 
-type Lanucher struct {
-	mtu sync.Mutex
-	queue *queue.TaskQueue
+type TaskLanucher struct {
+	mtu    sync.Mutex
+	queue  *queue.TaskQueue
+	taskOp task.TaskOpFactory
 }
 
-func NewLanucher() *Lanucher {
+func NewLanucher() *TaskLanucher {
 
-	return &Lanucher{
+	return &TaskLanucher{
 
 	}
 }
 
-func (l *Lanucher) ProcessOffer(driver sched.SchedulerDriver, offers[] *mesos.Offer) {
+func (t *TaskLanucher) ProcessOffer(driver sched.SchedulerDriver, offer *mesos.Offer) {
+	t.mtu.Lock()
+	defer t.mtu.Unlock()
 
+	task := t.queue.PopFront();
+	if (task != nil) {
+		// apply offer to task
+		if (t.taskOp.ApplyOffer(task, offer)) {
+			stat, err := driver.LaunchTasks(offer.GetId(), []*mesos.TaskInfo{task}, &mesos.Filters{})
+			if (err != nil) {
+				log.Warnf("Lanucher task error, task: %v, driver status: %v", task, stat)
+			}
+		} else {
+			t.DeclineOffer(driver, offer)
+		}
+
+	} else {
+		t.DeclineOffer(driver, offer)
+	}
 }
 
-func (l *Lanucher) DeclineOffer(driver sched.SchedulerDriver, offerId *mesos.OfferID) error {
-	status,err := driver.DeclineOffer(offerId, &mesos.Filters{})
+func (t *TaskLanucher) DeclineOffer(driver sched.SchedulerDriver, offerId *mesos.OfferID) error {
+	status, err := driver.DeclineOffer(offerId, &mesos.Filters{})
 
 	log.Warnf("declineOffer: %v", status)
 	return err

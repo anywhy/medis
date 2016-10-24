@@ -8,7 +8,7 @@ import (
 )
 
 type MedisScheduler struct {
-	lanucher TaskLanucher
+	lanucher *TaskLanucher
 }
 
 func NewMedisScheduler() (*MedisScheduler, error) {
@@ -65,7 +65,11 @@ func (sched *MedisScheduler) Disconnected(driver sched.SchedulerDriver) {
  */
 func (sched *MedisScheduler) ResourceOffers(driver sched.SchedulerDriver, offers[] *mesos.Offer) {
 	log.Infof("Resource Offers %v", offers)
-	sched.lanucher.ProcessOffer(driver, offers)
+
+	for _, offer := range offers {
+		sched.lanucher.ProcessOffer(driver, offer)
+	}
+
 		//if (count < 3) {
 		//
 		//

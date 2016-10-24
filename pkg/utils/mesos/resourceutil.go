@@ -39,3 +39,7 @@ func GetOfferDisk(offer *mesos.Offer) float64  {
 
 	return getOfferScalar(offer, resource.DISK)
 }
+
+func GetOfferIP(offer *mesos.Offer) string {
+	return offer.GetUrl().Address.GetIp()
+}

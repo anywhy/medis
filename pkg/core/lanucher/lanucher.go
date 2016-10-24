@@ -4,14 +4,17 @@ import (
 	mesos "github.com/mesos/mesos-go/mesosproto"
 	sched "github.com/mesos/mesos-go/scheduler"
 	"sync"
+	"github.com/anywhy/medis/pkg/utils/log"
+	"github.com/anywhy/medis/pkg/core/task/queue"
 )
 
 type TaskLanucher interface {
-	OfferResource(driver sched.SchedulerDriver, offer *mesos.Offer) error
+	ProcessOffer(driver sched.SchedulerDriver, offers[] *mesos.Offer)
 }
 
 type Lanucher struct {
 	mtu sync.Mutex
+	queue *queue.TaskQueue
 }
 
 func NewLanucher() *Lanucher {
@@ -21,7 +24,13 @@ func NewLanucher() *Lanucher {
 	}
 }
 
-func (l *Lanucher) OfferResource(driver sched.SchedulerDriver, offer *mesos.Offer) error {
+func (l *Lanucher) ProcessOffer(driver sched.SchedulerDriver, offers[] *mesos.Offer) {
 
-	return nil
+}
+
+func (l *Lanucher) DeclineOffer(driver sched.SchedulerDriver, offerId *mesos.OfferID) error {
+	status,err := driver.DeclineOffer(offerId, &mesos.Filters{})
+
+	log.Warnf("declineOffer: %v", status)
+	return err
 }

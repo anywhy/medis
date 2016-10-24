@@ -65,12 +65,7 @@ func (sched *MedisScheduler) Disconnected(driver sched.SchedulerDriver) {
  */
 func (sched *MedisScheduler) ResourceOffers(driver sched.SchedulerDriver, offers[] *mesos.Offer) {
 	log.Infof("Resource Offers %v", offers)
-
-	for _, offer := range offers {
-		err := sched.lanucher.OfferResource(driver, offer)
-		if(err != nil) {
-			log.Warnf("lanucher Task error, offer: %v", offer)
-		}
+	sched.lanucher.ProcessOffer(driver, offers)
 		//if (count < 3) {
 		//
 		//
@@ -107,7 +102,7 @@ func (sched *MedisScheduler) ResourceOffers(driver sched.SchedulerDriver, offers
 		//	driver.DeclineOffer(offer.Id, &mesos.Filters{})
 		//}
 
-	}
+
 }
 
 /*

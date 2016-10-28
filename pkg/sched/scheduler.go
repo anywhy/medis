@@ -8,13 +8,13 @@ import (
 )
 
 type MedisScheduler struct {
-	lanucher *TaskLanucher
+	offer *OfferProcessor
 }
 
 func NewMedisScheduler() (*MedisScheduler, error) {
 
 	return &MedisScheduler{
-		lanucher: NewLanucher(),
+		offer: NewOfferProcessor(),
 	}, nil
 }
 
@@ -67,7 +67,7 @@ func (sched *MedisScheduler) ResourceOffers(driver sched.SchedulerDriver, offers
 	log.Infof("Resource Offers %v", offers)
 
 	for _, offer := range offers {
-		sched.lanucher.ProcessOffer(driver, offer)
+		sched.offer.ProcessOffer(driver, offer)
 	}
 
 		//if (count < 3) {

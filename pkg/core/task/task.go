@@ -10,4 +10,5 @@ type Task struct {
 	Ip         string         `json:"ip"`
 	Port       int            `json:"port"`
 	TaskInfo   mesos.TaskInfo `json:"taskInfo"`
+	Dependent  Task           `json:"dependent"`
 }

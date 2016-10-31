@@ -1,9 +1,11 @@
 package matcher
 
-import  mesos "github.com/mesos/mesos-go/mesosproto"
+import (
+	"github.com/anywhy/medis/pkg/core/instance"
+	"github.com/anywhy/medis/pkg/core/task"
+	mesos "github.com/mesos/mesos-go/mesosproto"
+)
 
-type Matcher interface {
-	MatchOffer(offer *mesos.Offer) []*mesos.Offer_Operation
+type OfferMatcher interface {
+	MatchOffer(offer *mesos.Offer) (instance instance.Instance, tasks []*mesos.TaskInfo, offerOps []*mesos.Offer_Operation)
 }
-
-

@@ -7,5 +7,5 @@ import (
 )
 
 type OfferMatcher interface {
-	MatchOffer(offer *mesos.Offer) (instance instance.Instance, tasks []*mesos.TaskInfo, offerOps []*mesos.Offer_Operation)
+	MatchOffer(offer *mesos.Offer) (instance *instance.Instance, tasks []*mesos.TaskInfo, offerOps []*mesos.Offer_Operation)
 }

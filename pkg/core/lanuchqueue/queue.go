@@ -53,6 +53,19 @@ func (q *JobsQueue) ReomveFront() *instance.Instance {
 	return q.list.Remove(element)
 }
 
+func (q *JobsQueue) Contain(instance *instance.Instance) bool {
+	e := q.list.Front()
+	for e != nil {
+		if e.Value == instance {
+			return true
+		} else {
+			e = e.Next()
+		}
+	}
+
+	return false
+}
+
 func (q *JobsQueue) IsEmpty() bool {
 	q.mut.Lock()
 	defer q.mut.Unlock()

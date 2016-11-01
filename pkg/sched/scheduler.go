@@ -14,7 +14,7 @@ type MedisScheduler struct {
 func NewMedisScheduler() (*MedisScheduler, error) {
 
 	return &MedisScheduler{
-		offer: NewOfferProcessor(),
+		offer: NewOfferProcessor(nil),
 	}, nil
 }
 

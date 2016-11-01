@@ -51,9 +51,11 @@ func (o *OfferProcessor) AcceptOffers(driver sched.SchedulerDriver, offerId *mes
 	return nil == err
 }
 
-func (o *OfferProcessor) RevertTasks(ins instance.Instance, tasks []*mesos.TaskInfo) {
+func (o *OfferProcessor) RevertTasks(ins *instance.Instance, tasks []*mesos.TaskInfo) {
 	log.Warnf("Instance id: %s, RevertTasks: %v", ins.Id, tasks)
 	ins.AddPossibleTask(tasks)
 
 	// add to job queuq
+
+
 }

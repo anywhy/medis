@@ -1,25 +1,27 @@
 package sched
 
 type Config struct {
-	Master    string
+	master    string
 	Name      string
 	User      string
 	Principal string
-	Zk        string
+	Checkpoint bool
+	WebuiUrl string
+	Role string
+	FailoverTimeout float64
+	Secret string
+	AuthProvider string
+	Address string
 }
 
-func NewConfig(master string, name string, user string, principal string, zk string) *Config {
+func NewConfig(master string) *Config {
 	return &Config{
-		Master:    master,
-		Name:      name,
-		User:      user,
-		Principal: principal,
-		Zk:        zk,
+		master:    master,
 	}
 }
 
 func (c *Config) GetMaster() string  {
-	return c.Master
+	return c.master
 }
 
 func (c *Config) GetName() string  {
@@ -34,6 +36,30 @@ func (c *Config) GetPrincipal() string  {
 	return c.Principal
 }
 
-func (c *Config) GetZk() string  {
-	return c.Zk
+func (c *Config) GetCheckpoint() bool  {
+	return c.Checkpoint
+}
+
+func (c *Config) GetWebuiUrl() string  {
+	return c.WebuiUrl
+}
+
+func (c *Config) GetRole() string  {
+	return c.Role
+}
+
+func (c *Config) GetFailoverTimeout() float64  {
+	return c.FailoverTimeout
+}
+
+func (c *Config) GetSecret() string  {
+	return c.Secret
+}
+
+func (c *Config) GetAuthProvider() string  {
+	return c.AuthProvider
+}
+
+func (c *Config) GetAddress() string  {
+	return c.Address
 }

@@ -1,24 +1,23 @@
 package lanucher
 
 import (
+	"github.com/anywhy/medis/pkg/core/instance"
+	queue "github.com/anywhy/medis/pkg/core/lanuchqueue"
 	"github.com/anywhy/medis/pkg/core/matcher"
-	"github.com/anywhy/medis/pkg/core/task"
-	"github.com/anywhy/medis/pkg/core/task/queue"
 	"github.com/anywhy/medis/pkg/modules"
 	"github.com/anywhy/medis/pkg/utils/log"
 	mesos "github.com/mesos/mesos-go/mesosproto"
 	sched "github.com/mesos/mesos-go/scheduler"
 	"sync"
-	"github.com/anywhy/medis/pkg/core/instance"
 )
 
 type OfferProcessor struct {
 	mtu      sync.Mutex
-	client   *modules.Client
+	client   modules.Client
 	matacher matcher.OfferMatcher
 }
 
-func NewOfferProcessor(client *modules.Client) *OfferProcessor {
+func NewOfferProcessor(client modules.Client) *OfferProcessor {
 
 	return &OfferProcessor{
 		client: client,
@@ -55,7 +54,9 @@ func (o *OfferProcessor) RevertTasks(ins *instance.Instance, tasks []*mesos.Task
 	log.Warnf("Instance id: %s, RevertTasks: %v", ins.Id, tasks)
 	ins.AddPossibleTask(tasks)
 
-	// add to job queuq
-
+	// add to job queue
+	if !queue.Contain(ins) {
+		queue.Add(ins)
+	}
 
 }

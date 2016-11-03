@@ -16,5 +16,5 @@ type Task struct {
 	Type       string          `json:"type"`
 	Stauts     string          `json:"status"`
 	Ip         string          `json:"ip"`
-	Dependent  Task            `json:"dependent"`
+	Dependent  *Task            `json:"dependent"`
 }

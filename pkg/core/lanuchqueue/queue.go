@@ -2,59 +2,61 @@ package lanucherqueue
 
 import (
 	"container/list"
-	"github.com/anywhy/medis/pkg/core/instance"
 	"sync"
 )
+
+// job queue
+var jobQueue = newJobsQueue()
 
 type JobsQueue struct {
 	mut  sync.Mutex
 	list *list.List
 }
 
-func NewJobsQueue() *JobsQueue {
+func newJobsQueue() *JobsQueue {
 	return &JobsQueue{
 		list: list.New(),
 	}
 }
 
-func (q *JobsQueue) Add(job *instance.Instance) {
-	q.mut.Lock()
-	defer q.mut.Unlock()
-	q.list.PushBack(job)
+func Add(job interface{}) {
+	jobQueue.mut.Lock()
+	defer jobQueue.mut.Unlock()
+	jobQueue.list.PushBack(job)
 }
 
-func (q *JobsQueue) Size() int {
-	q.mut.Lock()
-	defer q.mut.Unlock()
-	return q.list.Len()
+func Size() int {
+	jobQueue.mut.Lock()
+	defer jobQueue.mut.Unlock()
+	return jobQueue.list.Len()
 }
 
-func (q *JobsQueue) Front() *instance.Instance {
-	q.mut.Lock()
-	defer q.mut.Unlock()
+func Front() interface{} {
+	jobQueue.mut.Lock()
+	defer jobQueue.mut.Unlock()
 
-	element := q.list.Front()
+	element := jobQueue.list.Front()
 	if element == nil {
 		return nil
 	}
 
-	return element.Value.(*instance.Instance)
+	return element.Value.(interface{})
 }
 
-func (q *JobsQueue) ReomveFront() *instance.Instance {
-	q.mut.Lock()
-	defer q.mut.Unlock()
+func ReomveFront() interface{} {
+	jobQueue.mut.Lock()
+	defer jobQueue.mut.Unlock()
 
-	element := q.list.Front()
+	element := jobQueue.list.Front()
 	if element == nil {
 		return nil
 	}
 
-	return q.list.Remove(element)
+	return jobQueue.list.Remove(element)
 }
 
-func (q *JobsQueue) Contain(instance *instance.Instance) bool {
-	e := q.list.Front()
+func Contain(instance interface{}) bool {
+	e := jobQueue.list.Front()
 	for e != nil {
 		if e.Value == instance {
 			return true
@@ -66,8 +68,8 @@ func (q *JobsQueue) Contain(instance *instance.Instance) bool {
 	return false
 }
 
-func (q *JobsQueue) IsEmpty() bool {
-	q.mut.Lock()
-	defer q.mut.Unlock()
-	return q.list.Len() == 0
+func IsEmpty() bool {
+	jobQueue.mut.Lock()
+	defer jobQueue.mut.Unlock()
+	return jobQueue.list.Len() == 0
 }

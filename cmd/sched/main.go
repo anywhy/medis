@@ -1,45 +1,33 @@
 package main
 
 import (
-	"os"
-	. "github.com/anywhy/medis/pkg/sched"
-
-	"github.com/gogo/protobuf/proto"
-	mesos "github.com/mesos/mesos-go/mesosproto"
-	sched "github.com/mesos/mesos-go/scheduler"
+	"fmt"
 	"github.com/anywhy/medis/pkg/utils/log"
+	"github.com/docopt/docopt-go"
 )
 
+var usage = `
+Usage:
+	medis-scheduler (--master=MASTER_ADDR) (--zk=ZK_PATH|--etcd=ETCD_ADDR) [--name=NAME] [--user=USER] [--mesos_principal=PRINCIPAL] [--check_point=CHECK_POINT] [--role=ROLE] [--failover_timeout=FAILOVER_TIMEOUT] [--secret_path=SECRET_PATH] [--auth_provider=AUTH_PROVIDER]
+Options:
+   --master=MASTER_ADDR			Mesos master address
+   --zk=ZK_PATH				Medis framework metadata address
+   --etcd=ETCD_ADDR			Medis framework metadata address
+   --name=NAME				Medis framework registered with name
+   --user=USER				Medis framework registered with user
+   --role=ROLE				Medis framework registered with role default *
+   --mesos_principal=MESOS_PRINCIPAL	Medis framework registered with mesos principal
+   --check_point=CHECK_POINT		Medis framework used checkpint or not
+   --failover_timeout=FAILOVER_TIMEOUT	Medis framework registered timeout
+   --secret_path=SECRET_PATH		Medis framework registered with scret file path
+   --auth_provider=AUTH_PROVIDER	Medis framework registered with auth provider default SASL
+`
+
 func main() {
-	// Framework
-	fwinfo := &mesos.FrameworkInfo{
-		Name: proto.String("medis"),
-		//Principal: proto.String("root"),
-		User: proto.String("root"),
-		Checkpoint: proto.Bool(true),
-	}
-
-	scheduler, _ := NewMedisScheduler()
-
-	// Scheduler Driver
-	config := sched.DriverConfig{
-		Scheduler:      scheduler,
-		Framework:      fwinfo,
-		Master:         "zk://localhost:2181/mesos",
-		Credential: (*mesos.Credential)(nil),
-	}
-
-	driver, err := sched.NewMesosSchedulerDriver(config)
-
+	args, err := docopt.Parse(usage, nil, true, "", false)
 	if err != nil {
-		log.Errorf("Unable to create a MedisSchedulerDriver: %v\n", err.Error())
-		os.Exit(-3)
+		log.PanicError(err)
 	}
 
-	if stat, err := driver.Run(); err != nil {
-		log.Errorf("Framework stopped with status %s and error: %s\n", stat.String(), err.Error())
-		os.Exit(-4)
-	}
-
-
+	fmt.Println(args)
 }

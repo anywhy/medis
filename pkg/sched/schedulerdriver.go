@@ -16,7 +16,7 @@ import (
 	"os"
 )
 
-func NewSchedulerDriver(config *Config, client models.Client) *scheduler.MesosSchedulerDriver {
+func NewSchedulerDriver(config *Config, client models.Client) (*scheduler.MesosSchedulerDriver, error) {
 	fwinfo, cred := frameworkInfoBuild(config, client)
 
 	bindingAddress := parseIP(config.GetAddress())

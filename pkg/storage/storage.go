@@ -13,5 +13,5 @@ func GetFrameworkId(client models.Client) string {
 }
 
 func SetFrameworkId(client models.Client, fwId string) error {
-	return client.Create(models.FrameworkIdPath(), []byte(fwId))
+	return client.Update(models.FrameworkIdPath(), []byte(fwId))
 }

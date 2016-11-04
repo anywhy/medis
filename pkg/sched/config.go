@@ -1,6 +1,6 @@
 package sched
 
-import "github.com/mesos/mr-redis/sched/Godeps/_workspace/src/github.com/mesos/mesos-go/auth/sasl"
+import "github.com/mesos/mesos-go/auth/sasl"
 
 type Config struct {
 	master    string

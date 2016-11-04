@@ -1,20 +1,21 @@
 package sched
 
 import (
+	"fmt"
+	"github.com/anywhy/medis/pkg/models"
 	"github.com/anywhy/medis/pkg/storage"
 	"github.com/anywhy/medis/pkg/utils/log"
 	"github.com/gogo/protobuf/proto"
 	"github.com/mesos/mesos-go/auth"
 	"github.com/mesos/mesos-go/auth/sasl"
 	mesos "github.com/mesos/mesos-go/mesosproto"
+	util "github.com/mesos/mesos-go/mesosutil"
 	"github.com/mesos/mesos-go/scheduler"
 	sched "github.com/mesos/mesos-go/scheduler"
-	util "github.com/mesos/mesos-go/mesosutil"
 	"golang.org/x/net/context"
 	"io/ioutil"
 	"net"
 	"os"
-	"github.com/anywhy/medis/pkg/models"
 )
 
 func NewSchedulerDriver(config *Config, client models.Client) (*scheduler.MesosSchedulerDriver, error) {
@@ -24,7 +25,7 @@ func NewSchedulerDriver(config *Config, client models.Client) (*scheduler.MesosS
 	if err != nil {
 		log.Panic("create medisScheduler error")
 	}
-
+	fmt.Print(config.GetMaster())
 	bindingAddress := parseIP(config.GetAddress())
 	driverConfig := sched.DriverConfig{
 		Scheduler:      scheduler,

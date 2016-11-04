@@ -48,6 +48,14 @@ func NewZkClient(zkAddr string, timeout time.Duration, logger func(foramt string
 	if timeout <= 0 {
 		timeout = time.Second * 30
 	}
+	zkParent := ""
+	if strings.HasPrefix(zkAddr, "zk://") {
+		if strings.LastIndex(zkAddr, "/") > 5 {
+		} else {
+			zkAddr = strings.TrimPrefix(zkAddr, "zk://")
+		}
+
+	}
 
 	client := &Client{
 		zkAddr:  zkAddr,
@@ -56,6 +64,12 @@ func NewZkClient(zkAddr string, timeout time.Duration, logger func(foramt string
 
 	if err := client.reset(); err != nil {
 		return nil, err
+	}
+
+	if zkParent != "" {
+		if err := client.MkDir(zkParent); err != nil {
+			client.logger.Printf("create parent path error")
+		}
 	}
 
 	return client, nil

@@ -1,16 +1,17 @@
 package sched
 
 import (
-	"github.com/CodisLabs/codis/pkg/models"
-	. "github.com/anywhy/medis/pkg/core/lanucher"
 	"github.com/anywhy/medis/pkg/storage"
 	"github.com/anywhy/medis/pkg/utils/log"
 	mesos "github.com/mesos/mesos-go/mesosproto"
 	sched "github.com/mesos/mesos-go/scheduler"
+	util "github.com/mesos/mesos-go/mesosutil"
+	"github.com/pborman/uuid"
+	"github.com/gogo/protobuf/proto"
+	"github.com/anywhy/medis/pkg/models"
 )
 
 type MedisScheduler struct {
-	offer  *OfferProcessor
 	client models.Client
 }
 
@@ -18,7 +19,6 @@ func NewMedisScheduler(client models.Client) (*MedisScheduler, error) {
 
 	return &MedisScheduler{
 		client: client,
-		offer:  NewOfferProcessor(client),
 	}, nil
 }
 
@@ -54,7 +54,7 @@ func (sched *MedisScheduler) Disconnected(driver sched.SchedulerDriver) {
 	log.Warn("MedisScheduler Disconnected")
 	driver.Stop(true)
 }
-
+var count = 1
 /*
  * Invoked when resources have been offered to this framework. A
  * single offer will only contain resources from a single slave.
@@ -73,46 +73,49 @@ func (sched *MedisScheduler) Disconnected(driver sched.SchedulerDriver) {
 func (sched *MedisScheduler) ResourceOffers(driver sched.SchedulerDriver, offers []*mesos.Offer) {
 	log.Infof("Resource Offers %v", offers)
 
-	for _, offer := range offers {
-		sched.offer.ProcessOffer(driver, offer)
-	}
-
-	//if (count < 3) {
-	//
-	//
-	//	//exec := &mesos.ExecutorInfo{
-	//	//	ExecutorId: util.NewExecutorID("task." + id),
-	//	//	Source: proto.String("go Test"),
-	//	//	Command: &mesos.CommandInfo{
-	//	//		Value: proto.String("echo 'hello medis'; sleep 100"),
-	//	//
-	//	//	},
-	//	//	Resources: []*mesos.Resource{
-	//	//		util.NewScalarResource("cpus", 0.1),
-	//	//		util.NewScalarResource("mem", 10),
-	//	//	},
-	//	//
-	//	//}
-	//
-	//	id := uuid.New();
-	//
-	//	driver.LaunchTasks([]*mesos.OfferID{offer.Id}, []*mesos.TaskInfo{{
-	//		Name: proto.String("test"),
-	//		TaskId: &mesos.TaskID{Value: proto.String("task." + id)},
-	//		SlaveId: offer.SlaveId,
-	//		Command: &mesos.CommandInfo{
-	//			Value: proto.String("sleep 1000"),
-	//		},
-	//		Resources: []*mesos.Resource{
-	//			util.NewScalarResource("cpus", 0.1),
-	//			util.NewScalarResource("mem", 10),
-	//		},
-	//	}}, &mesos.Filters{})
-	//	count++
-	//} else {
-	//	driver.DeclineOffer(offer.Id, &mesos.Filters{})
+	//for _, offer := range offers {
+	//	sched.offer.ProcessOffer(driver, offer)
 	//}
 
+	for _, offer := range offers {
+		//sched.offer.ProcessOffer(driver, offer)
+
+	if (count < 3) {
+
+
+		//exec := &mesos.ExecutorInfo{
+		//	ExecutorId: util.NewExecutorID("task." + id),
+		//	Source: proto.String("go Test"),
+		//	Command: &mesos.CommandInfo{
+		//		Value: proto.String("echo 'hello medis'; sleep 100"),
+		//
+		//	},
+		//	Resources: []*mesos.Resource{
+		//		util.NewScalarResource("cpus", 0.1),
+		//		util.NewScalarResource("mem", 10),
+		//	},
+		//
+		//}
+
+		id := uuid.New();
+
+		driver.LaunchTasks([]*mesos.OfferID{offer.Id}, []*mesos.TaskInfo{{
+			Name: proto.String("test"),
+			TaskId: &mesos.TaskID{Value: proto.String("task." + id)},
+			SlaveId: offer.SlaveId,
+			Command: &mesos.CommandInfo{
+				Value: proto.String("sleep 1000"),
+			},
+			Resources: []*mesos.Resource{
+				util.NewScalarResource("cpus", 0.1),
+				util.NewScalarResource("mem", 10),
+			},
+		}}, &mesos.Filters{})
+		count++
+	} else {
+		driver.DeclineOffer(offer.Id, &mesos.Filters{})
+	}
+	}
 }
 
 /*

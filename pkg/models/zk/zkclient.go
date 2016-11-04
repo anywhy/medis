@@ -22,7 +22,7 @@ type zkLogger struct {
 	logger func(format string, v ...interface{})
 }
 
-func (z *zkLogger) Printlnf(format string, v ...interface{}) {
+func (z *zkLogger) Printf(format string, v ...interface{}) {
 	if nil != z && z.logger != nil {
 		z.logger(format, v...)
 	}
@@ -73,7 +73,7 @@ func (c *Client) reset() error {
 	c.conn = conn
 	c.conn.SetLogger(c.logger)
 
-	c.logger.Printlnf("zkclient setup new connection to %s", c.zkAddr)
+	c.logger.Printf("zkclient setup new connection to %s", c.zkAddr)
 
 	go func() {
 		for e := range events {

@@ -22,6 +22,9 @@ func NewConfig(master string) *Config {
 	return &Config{
 		master:    master,
 		AuthProvider: sasl.ProviderName,
+		Name: "medis",
+		Checkpoint: true,
+		Address: "0.0.0.0",
 	}
 }
 

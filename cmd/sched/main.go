@@ -17,7 +17,7 @@ Options:
    --master=MASTER_ADDR			Mesos master address
    --zk=ZK_PATH				Medis framework metadata address
    --etcd=ETCD_ADDR			Medis framework metadata address
-   --http_port=HTTP_PORT		edis framework start with UI http port
+   --http_port=HTTP_PORT		Medis framework start with UI http port
    --name=NAME				Medis framework registered with name
    --user=USER				Medis framework registered with user
    --role=ROLE				Medis framework registered with role default *
@@ -84,7 +84,7 @@ func main() {
 		config.Secret = secretPath
 	}
 
-	if failoverTimeout, ok := utils.Argument(args, "--failover_timeout"); ok {
+	if failoverTimeout, ok := utils.ArgumentFloat64(args, "--failover_timeout"); ok {
 		config.FailoverTimeout = failoverTimeout
 	}
 
@@ -121,6 +121,6 @@ func main() {
 	}
 
 	if stat, err := driver.Run(); err != nil {
-		log.PanicErrorf("Framework stopped with status %s and error: %s\n", stat.String(), err.Error())
+		log.PanicErrorf(err, "Framework stopped with status %s and error: %s\n", stat.String(), err.Error())
 	}
 }

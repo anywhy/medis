@@ -36,17 +36,17 @@ func (i *Instance) IsLanuched() bool {
 func (i *Instance) GetTasks() []Task {
 	list := make([]Task, 0, len(i.TaskMap))
 
-	for item := range i.TaskMap {
+	for _,item := range i.TaskMap {
 		list = append(list, item)
 	}
 
 	return list
 }
 
-func (i *Instance) GetPossibleTask() []Task {
-	list := make([]Task, 0, len(i.PossibleNewTask))
+func (i *Instance) GetPossibleTask() []*mesos.TaskInfo {
+	list := make([]*mesos.TaskInfo, 0, len(i.PossibleNewTask))
 
-	for item := range i.PossibleNewTask {
+	for _, item := range i.PossibleNewTask {
 		list = append(list, item)
 	}
 
@@ -54,5 +54,7 @@ func (i *Instance) GetPossibleTask() []Task {
 }
 
 func (i *Instance) AddPossibleTask(tasks []*mesos.TaskInfo) {
-	i.PossibleNewTask = append(i.PossibleNewTask, tasks)
+	for _, item := range  tasks {
+		i.PossibleNewTask = append(i.PossibleNewTask, item)
+	}
 }

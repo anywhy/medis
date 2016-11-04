@@ -1,7 +1,6 @@
 package sched
 
 import (
-	"github.com/CodisLabs/codis/pkg/models"
 	"github.com/anywhy/medis/pkg/storage"
 	"github.com/anywhy/medis/pkg/utils/log"
 	"github.com/gogo/protobuf/proto"
@@ -10,20 +9,27 @@ import (
 	mesos "github.com/mesos/mesos-go/mesosproto"
 	"github.com/mesos/mesos-go/scheduler"
 	sched "github.com/mesos/mesos-go/scheduler"
+	util "github.com/mesos/mesos-go/mesosutil"
 	"golang.org/x/net/context"
 	"io/ioutil"
 	"net"
 	"os"
+	"github.com/anywhy/medis/pkg/models"
 )
 
 func NewSchedulerDriver(config *Config, client models.Client) (*scheduler.MesosSchedulerDriver, error) {
 	fwinfo, cred := frameworkInfoBuild(config, client)
 
+	scheduler, err := NewMedisScheduler(client)
+	if err != nil {
+		log.Panic("create medisScheduler error")
+	}
+
 	bindingAddress := parseIP(config.GetAddress())
 	driverConfig := sched.DriverConfig{
-		Scheduler:      NewMedisScheduler(client),
+		Scheduler:      scheduler,
 		Framework:      fwinfo,
-		Master:         proto.String(config.GetMaster()),
+		Master:         config.GetMaster(),
 		Credential:     cred,
 		BindingAddress: bindingAddress,
 		WithAuthContext: func(ctx context.Context) context.Context {
@@ -44,13 +50,13 @@ func frameworkInfoBuild(config *Config, client models.Client) (*mesos.FrameworkI
 	}
 
 	cred := (*mesos.Credential)(nil)
-	if config.GetPrincipal() != nil {
+	if config.GetPrincipal() != "" {
 		fwinfo.Principal = proto.String(config.GetPrincipal())
 		cred = &mesos.Credential{
 			Principal: proto.String(config.GetPrincipal()),
 		}
 
-		if config.GetSecret() != nil {
+		if config.GetSecret() != "" {
 			_, err := os.Stat(config.GetSecret())
 			if err != nil {
 				log.Errorf("missing secret file: ", err.Error())
@@ -63,29 +69,29 @@ func frameworkInfoBuild(config *Config, client models.Client) (*mesos.FrameworkI
 		}
 	}
 
-	if config.GetUser() != nil {
-		fwinfo.User = config.GetUser()
+	if config.GetUser() != "" {
+		fwinfo.User = proto.String(config.GetUser())
 	}
 
-	if config.GetCheckpoint() != nil {
-		fwinfo.Checkpoint = config.GetCheckpoint()
+	if config.GetCheckpoint() != false {
+		fwinfo.Checkpoint = proto.Bool(config.GetCheckpoint())
 	}
 
-	if config.GetWebuiUrl() != nil {
-		fwinfo.WebuiUrl = config.GetWebuiUrl()
+	if config.GetWebuiUrl() != "" {
+		fwinfo.WebuiUrl = proto.String(config.GetWebuiUrl())
 	}
 
-	if config.GetRole() != nil {
-		fwinfo.Role = config.GetRole()
+	if config.GetRole() != "" {
+		fwinfo.Role = proto.String(config.GetRole())
 	}
 
-	if config.GetFailoverTimeout() != nil {
-		fwinfo.FailoverTimeout = config.GetFailoverTimeout()
+	if config.GetFailoverTimeout() != 0 {
+		fwinfo.FailoverTimeout = proto.Float64(config.GetFailoverTimeout())
 	}
 
 	fwId := storage.GetFrameworkId(client)
-	if fwId != nil {
-		fwinfo.Id = fwId
+	if fwId != "" {
+		fwinfo.Id = util.NewFrameworkID(fwId)
 	}
 
 	return fwinfo, cred

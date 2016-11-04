@@ -17,7 +17,7 @@ func Argument(argsMap map[string]interface{}, name string) (string, bool) {
 		}
 	}
 
-	return nil, false
+	return "", false
 }
 
 func ArgumentMust(argsMap map[string]interface{}, name string) string {
@@ -26,7 +26,7 @@ func ArgumentMust(argsMap map[string]interface{}, name string) string {
 	}
 
 	log.Panicf("option %s is required", name)
-	return nil
+	return ""
 }
 
 func ArgumentInt(argsMap map[string]interface{}, name string) (int, bool) {
@@ -40,7 +40,7 @@ func ArgumentInt(argsMap map[string]interface{}, name string) (int, bool) {
 		return n, true
 	}
 
-	return nil, false
+	return 0, false
 }
 
 func ArgumentIntMust(argsMap map[string]interface{}, name string) int {
@@ -49,7 +49,7 @@ func ArgumentIntMust(argsMap map[string]interface{}, name string) int {
 	}
 
 	log.Panicf("option %s is required", name)
-	return nil
+	return 0
 }
 
 func ArgumentBool(argsMap map[string]interface{}, name string) (bool, bool) {
@@ -63,7 +63,7 @@ func ArgumentBool(argsMap map[string]interface{}, name string) (bool, bool) {
 		return n, true
 	}
 
-	return nil, false
+	return false, false
 }
 
 func ArgumentBoolMust(argsMap map[string]interface{}, name string) bool {
@@ -72,5 +72,28 @@ func ArgumentBoolMust(argsMap map[string]interface{}, name string) bool {
 	}
 
 	log.Panicf("option %s is required", name)
-	return nil
+	return false
+}
+
+func ArgumentFloat64(argsMap map[string]interface{}, name string) (float64, bool) {
+	if v, ok := Argument(argsMap, name); ok {
+		n, err := strconv.ParseFloat(v, 64)
+
+		if err != nil {
+			log.PanicErrorf(err, "option %s isn't a valid bool", name)
+		}
+
+		return n, true
+	}
+
+	return 0, false
+}
+
+func ArgumentFloat64Must(argsMap map[string]interface{}, name string) float64 {
+	if v, ok := ArgumentFloat64(argsMap, name); ok {
+		return v
+	}
+
+	log.Panicf("option %s is required", name)
+	return 0
 }

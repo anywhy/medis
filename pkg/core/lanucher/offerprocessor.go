@@ -9,6 +9,7 @@ import (
 	mesos "github.com/mesos/mesos-go/mesosproto"
 	sched "github.com/mesos/mesos-go/scheduler"
 	"sync"
+	"github.com/mesos/mr-redis/exec/Godeps/_workspace/src/github.com/gogo/protobuf/proto"
 )
 
 type OfferProcessor struct {
@@ -34,7 +35,7 @@ func (o *OfferProcessor) ProcessOffer(driver sched.SchedulerDriver, offer *mesos
 		o.RevertTasks(ins, taks)
 	}
 
-	o.declineOffer(driver, offer)
+	o.declineOffer(driver, offer.Id)
 }
 
 func (o *OfferProcessor) declineOffer(driver sched.SchedulerDriver, offerId *mesos.OfferID) {
@@ -45,7 +46,7 @@ func (o *OfferProcessor) declineOffer(driver sched.SchedulerDriver, offerId *mes
 }
 
 func (o *OfferProcessor) AcceptOffers(driver sched.SchedulerDriver, offerId *mesos.OfferID, offerOp []*mesos.Offer_Operation) bool {
-	_, err := driver.AcceptOffers([]*mesos.OfferID{offerId}, offerOp, &mesos.Filters{RefuseSeconds: 0})
+	_, err := driver.AcceptOffers([]*mesos.OfferID{offerId}, offerOp, &mesos.Filters{RefuseSeconds: proto.Float64(0)})
 
 	return nil == err
 }

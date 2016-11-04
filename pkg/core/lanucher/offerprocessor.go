@@ -6,10 +6,10 @@ import (
 	"github.com/anywhy/medis/pkg/core/matcher"
 	"github.com/anywhy/medis/pkg/models"
 	"github.com/anywhy/medis/pkg/utils/log"
+	"github.com/gogo/protobuf/proto"
 	mesos "github.com/mesos/mesos-go/mesosproto"
 	sched "github.com/mesos/mesos-go/scheduler"
 	"sync"
-	"github.com/mesos/mr-redis/exec/Godeps/_workspace/src/github.com/gogo/protobuf/proto"
 )
 
 type OfferProcessor struct {

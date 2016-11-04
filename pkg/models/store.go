@@ -2,8 +2,8 @@ package models
 
 import "path/filepath"
 
-const StateDir  = "/state"
+const StateDir  = "state"
 
 func FrameworkIdPath() string {
-	return filepath.Join(StateDir, "frameworkId")
+	return filepath.Join(StateDir, "framework:id")
 }

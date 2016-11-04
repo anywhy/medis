@@ -38,6 +38,7 @@ type Client struct {
 	logger *zkLogger
 	dialAt time.Time
 	closed bool
+	basePath string
 }
 
 func New(addrs string, timeout time.Duration) (*Client, error) {
@@ -51,6 +52,9 @@ func NewZkClient(zkAddr string, timeout time.Duration, logger func(foramt string
 	zkParent := ""
 	if strings.HasPrefix(zkAddr, "zk://") {
 		if strings.LastIndex(zkAddr, "/") > 5 {
+			zkParent = zkAddr[strings.LastIndex(zkAddr, "/"):]
+			zkAddr = strings.TrimPrefix(zkAddr, "zk://")
+			zkAddr = zkAddr[:strings.Index(zkAddr, "/")]
 		} else {
 			zkAddr = strings.TrimPrefix(zkAddr, "zk://")
 		}
@@ -60,18 +64,12 @@ func NewZkClient(zkAddr string, timeout time.Duration, logger func(foramt string
 	client := &Client{
 		zkAddr:  zkAddr,
 		timeout: timeout,
+		basePath: zkParent,
 	}
 
 	if err := client.reset(); err != nil {
 		return nil, err
 	}
-
-	if zkParent != "" {
-		if err := client.MkDir(zkParent); err != nil {
-			client.logger.Printf("create parent path error")
-		}
-	}
-
 	return client, nil
 }
 
@@ -148,7 +146,7 @@ func (c *Client) MkDir(path string) error {
 	log.Debugf("zkclient mkdir node %s", path)
 
 	err := c.shell(func(conn *zk.Conn) error {
-		return c.mkDir(conn, path)
+		return c.mkDir(conn, filepath.Join(c.basePath, path))
 	})
 
 	if err != nil {
@@ -186,7 +184,7 @@ func (c *Client) Create(path string, data []byte) error {
 	}
 	log.Debugf("zkclient create node %s", path)
 	err := c.shell(func(conn *zk.Conn) error {
-		_, err := c.create(conn, path, data, 0)
+		_, err := c.create(conn, filepath.Join(c.basePath, path), data, 0)
 		return err
 	})
 	if err != nil {
@@ -231,7 +229,7 @@ func (c *Client) Update(path string, data []byte) error {
 
 	log.Debugf("zkclient update node %s", path)
 	err := c.shell(func(conn *zk.Conn) error {
-		return c.update(conn, path, data)
+		return c.update(conn, filepath.Join(c.basePath, path), data)
 	})
 	if err != nil {
 		log.Debugf("zkclient update node %s failed: %s", path, err)
@@ -266,7 +264,7 @@ func (c *Client) Delete(path string) error {
 
 	log.Debugf("zkclient delete node %s", path)
 	err := c.shell(func(conn *zk.Conn) error {
-		err := conn.Delete(path, -1)
+		err := conn.Delete(filepath.Join(c.basePath, path), -1)
 		if err != nil && errors.NotEqual(err, zk.ErrNoNode) {
 			return errors.Trace(err)
 		}
@@ -290,7 +288,7 @@ func (c *Client) Read(path string, must bool) ([]byte, error) {
 
 	var data []byte
 	err := c.shell(func(conn *zk.Conn) error {
-		b, _, err := conn.Get(path)
+		b, _, err := conn.Get(filepath.Join(c.basePath, path))
 		if err != nil {
 			if errors.Equal(err, zk.ErrNoNode) && !must {
 				return nil
@@ -318,7 +316,7 @@ func (c *Client) List(path string, must bool) ([]string, error) {
 
 	var paths []string
 	err := c.shell(func(conn *zk.Conn) error {
-		nodes, _, err := conn.Children(path)
+		nodes, _, err := conn.Children(filepath.Join(c.basePath, path))
 		if err != nil {
 			if errors.Equal(err, zk.ErrNoNode) && !must {
 				return nil

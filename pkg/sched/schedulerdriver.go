@@ -1,15 +1,12 @@
 package sched
 
 import (
-	"fmt"
 	"github.com/anywhy/medis/pkg/models"
-	"github.com/anywhy/medis/pkg/storage"
 	"github.com/anywhy/medis/pkg/utils/log"
 	"github.com/gogo/protobuf/proto"
 	"github.com/mesos/mesos-go/auth"
 	"github.com/mesos/mesos-go/auth/sasl"
 	mesos "github.com/mesos/mesos-go/mesosproto"
-	util "github.com/mesos/mesos-go/mesosutil"
 	"github.com/mesos/mesos-go/scheduler"
 	sched "github.com/mesos/mesos-go/scheduler"
 	"golang.org/x/net/context"
@@ -25,7 +22,7 @@ func NewSchedulerDriver(config *Config, client models.Client) (*scheduler.MesosS
 	if err != nil {
 		log.Panic("create medisScheduler error")
 	}
-	fmt.Print(config.GetMaster())
+
 	bindingAddress := parseIP(config.GetAddress())
 	driverConfig := sched.DriverConfig{
 		Scheduler:      scheduler,
@@ -53,11 +50,11 @@ func frameworkInfoBuild(config *Config, client models.Client) (*mesos.FrameworkI
 	cred := (*mesos.Credential)(nil)
 	if config.GetPrincipal() != "" {
 		fwinfo.Principal = proto.String(config.GetPrincipal())
-		cred = &mesos.Credential{
-			Principal: proto.String(config.GetPrincipal()),
-		}
 
 		if config.GetSecret() != "" {
+			cred = &mesos.Credential{
+				Principal: proto.String(config.GetPrincipal()),
+			}
 			_, err := os.Stat(config.GetSecret())
 			if err != nil {
 				log.Errorf("missing secret file: ", err.Error())
@@ -90,10 +87,10 @@ func frameworkInfoBuild(config *Config, client models.Client) (*mesos.FrameworkI
 		fwinfo.FailoverTimeout = proto.Float64(config.GetFailoverTimeout())
 	}
 
-	fwId := storage.GetFrameworkId(client)
-	if fwId != "" {
-		fwinfo.Id = util.NewFrameworkID(fwId)
-	}
+	//fwId := storage.GetFrameworkId(client)
+	//if fwId != "" {
+	//	fwinfo.Id = util.NewFrameworkID(fwId)
+	//}
 
 	return fwinfo, cred
 }

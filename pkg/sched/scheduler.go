@@ -1,14 +1,14 @@
 package sched
 
 import (
+	"github.com/anywhy/medis/pkg/models"
 	"github.com/anywhy/medis/pkg/storage"
 	"github.com/anywhy/medis/pkg/utils/log"
-	mesos "github.com/mesos/mesos-go/mesosproto"
-	sched "github.com/mesos/mesos-go/scheduler"
-	util "github.com/mesos/mesos-go/mesosutil"
-	"github.com/pborman/uuid"
 	"github.com/gogo/protobuf/proto"
-	"github.com/anywhy/medis/pkg/models"
+	mesos "github.com/mesos/mesos-go/mesosproto"
+	util "github.com/mesos/mesos-go/mesosutil"
+	sched "github.com/mesos/mesos-go/scheduler"
+	"github.com/pborman/uuid"
 )
 
 type MedisScheduler struct {
@@ -54,7 +54,9 @@ func (sched *MedisScheduler) Disconnected(driver sched.SchedulerDriver) {
 	log.Warn("MedisScheduler Disconnected")
 	driver.Stop(true)
 }
+
 var count = 1
+
 /*
  * Invoked when resources have been offered to this framework. A
  * single offer will only contain resources from a single slave.
@@ -80,41 +82,50 @@ func (sched *MedisScheduler) ResourceOffers(driver sched.SchedulerDriver, offers
 	for _, offer := range offers {
 		//sched.offer.ProcessOffer(driver, offer)
 
-	if (count < 3) {
+		if count < 3 {
+
+			//exec := &mesos.ExecutorInfo{
+			//	ExecutorId: util.NewExecutorID("task." + id),
+			//	Source: proto.String("go Test"),
+			//	Command: &mesos.CommandInfo{
+			//		Value: proto.String("echo 'hello medis'; sleep 100"),
+			//
+			//	},
+			//	Resources: []*mesos.Resource{
+			//		util.NewScalarResource("cpus", 0.1),
+			//		util.NewScalarResource("mem", 10),
+			//	},
+			//
+			//}
+
+			id := uuid.New()
+
+			driver.LaunchTasks([]*mesos.OfferID{offer.Id}, []*mesos.TaskInfo{{
+				Name:    proto.String("test"),
+				TaskId:  &mesos.TaskID{Value: proto.String("task." + id)},
+				SlaveId: offer.SlaveId,
+				Command: &mesos.CommandInfo{
+					Value: proto.String("sleep 1000"),
+				},
+				Resources: []*mesos.Resource{
+					util.NewScalarResource("cpus", 0.1),
+					util.NewScalarResource("mem", 10),
+				},
+			}}, &mesos.Filters{})
 
 
-		//exec := &mesos.ExecutorInfo{
-		//	ExecutorId: util.NewExecutorID("task." + id),
-		//	Source: proto.String("go Test"),
-		//	Command: &mesos.CommandInfo{
-		//		Value: proto.String("echo 'hello medis'; sleep 100"),
-		//
-		//	},
-		//	Resources: []*mesos.Resource{
-		//		util.NewScalarResource("cpus", 0.1),
-		//		util.NewScalarResource("mem", 10),
-		//	},
-		//
-		//}
 
-		id := uuid.New();
 
-		driver.LaunchTasks([]*mesos.OfferID{offer.Id}, []*mesos.TaskInfo{{
-			Name: proto.String("test"),
-			TaskId: &mesos.TaskID{Value: proto.String("task." + id)},
-			SlaveId: offer.SlaveId,
-			Command: &mesos.CommandInfo{
-				Value: proto.String("sleep 1000"),
-			},
-			Resources: []*mesos.Resource{
-				util.NewScalarResource("cpus", 0.1),
-				util.NewScalarResource("mem", 10),
-			},
-		}}, &mesos.Filters{})
-		count++
-	} else {
-		driver.DeclineOffer(offer.Id, &mesos.Filters{})
-	}
+			driver.AcceptOffers([]*mesos.OfferID{offer.Id}, []*mesos.Offer_Operation{
+				util.NewCreateOperation([]*mesos.Resource{
+					util.NewVolumeResourceWithReservation(50, "data", id, mesos.Volume_RW.Enum(), "yangd", "dd"),
+				}),
+			}, &mesos.Filters{})
+
+			count++
+		} else {
+			driver.DeclineOffer(offer.Id, &mesos.Filters{})
+		}
 	}
 }
 
@@ -190,5 +201,15 @@ func (sched *MedisScheduler) ExecutorLost(driver sched.SchedulerDriver, eid *mes
  * callback.
  */
 func (sched *MedisScheduler) Error(driver sched.SchedulerDriver, err string) {
-	log.Errorf("MedisScheduler received error: %v", err)
+	log.Warnf("Error: %s\n" +
+		"In case Mesos does not allow registration with the current frameworkId, " +
+		" delete the ZooKeeper Node: ${config.zkPath}/state/framework:id " +
+		"CAUTION: if you remove this node, all tasks started with the current frameworkId will be orphaned!")
+
+	switch err {
+	case "Framework has been removed":
+		storage.DelFrameworkId(sched.client)
+	default:
+
+	}
 }

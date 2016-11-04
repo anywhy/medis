@@ -1,9 +1,9 @@
-package modules
+package models
 
 import (
 	"time"
 	"github.com/anywhy/medis/pkg/utils/errors"
-	"github.com/anywhy/medis/pkg/modules/zk"
+	"github.com/anywhy/medis/pkg/models/zk"
 )
 
 type Client interface {

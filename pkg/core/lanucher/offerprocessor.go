@@ -4,7 +4,7 @@ import (
 	"github.com/anywhy/medis/pkg/core/instance"
 	queue "github.com/anywhy/medis/pkg/core/lanuchqueue"
 	"github.com/anywhy/medis/pkg/core/matcher"
-	"github.com/anywhy/medis/pkg/modules"
+	"github.com/anywhy/medis/pkg/models"
 	"github.com/anywhy/medis/pkg/utils/log"
 	mesos "github.com/mesos/mesos-go/mesosproto"
 	sched "github.com/mesos/mesos-go/scheduler"
@@ -13,11 +13,11 @@ import (
 
 type OfferProcessor struct {
 	mtu      sync.Mutex
-	client   modules.Client
+	client   models.Client
 	matacher matcher.OfferMatcher
 }
 
-func NewOfferProcessor(client modules.Client) *OfferProcessor {
+func NewOfferProcessor(client models.Client) *OfferProcessor {
 
 	return &OfferProcessor{
 		client: client,

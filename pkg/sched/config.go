@@ -1,5 +1,7 @@
 package sched
 
+import "github.com/mesos/mr-redis/sched/Godeps/_workspace/src/github.com/mesos/mesos-go/auth/sasl"
+
 type Config struct {
 	master    string
 	Name      string
@@ -12,11 +14,14 @@ type Config struct {
 	Secret string
 	AuthProvider string
 	Address string
+	CoordinatorAddr string
+	CoordinatorName string
 }
 
 func NewConfig(master string) *Config {
 	return &Config{
 		master:    master,
+		AuthProvider: sasl.ProviderName,
 	}
 }
 

@@ -4,11 +4,11 @@ import (
 	"github.com/anywhy/medis/pkg/models"
 	"github.com/anywhy/medis/pkg/storage"
 	"github.com/anywhy/medis/pkg/utils/log"
-	"github.com/gogo/protobuf/proto"
 	mesos "github.com/mesos/mesos-go/mesosproto"
 	util "github.com/mesos/mesos-go/mesosutil"
 	sched "github.com/mesos/mesos-go/scheduler"
 	"github.com/pborman/uuid"
+	"github.com/gogo/protobuf/proto"
 )
 
 type MedisScheduler struct {
@@ -99,13 +99,19 @@ func (sched *MedisScheduler) ResourceOffers(driver sched.SchedulerDriver, offers
 			//}
 
 			id := uuid.New()
-
+			//fmt.Println(id)
 			driver.LaunchTasks([]*mesos.OfferID{offer.Id}, []*mesos.TaskInfo{{
 				Name:    proto.String("test"),
 				TaskId:  &mesos.TaskID{Value: proto.String("task." + id)},
 				SlaveId: offer.SlaveId,
 				Command: &mesos.CommandInfo{
-					Value: proto.String("sleep 1000"),
+					Value: proto.String("echo $PORT0;sleep 1000"),
+					Environment: &mesos.Environment{
+						Variables: []*mesos.Environment_Variable{{
+							Name: proto.String("PORT0"),
+							Value: proto.String("6380"),
+						}},
+					},
 				},
 				Resources: []*mesos.Resource{
 					util.NewScalarResource("cpus", 0.1),
@@ -116,13 +122,14 @@ func (sched *MedisScheduler) ResourceOffers(driver sched.SchedulerDriver, offers
 
 
 
-			driver.AcceptOffers([]*mesos.OfferID{offer.Id}, []*mesos.Offer_Operation{
-				util.NewCreateOperation([]*mesos.Resource{
-					util.NewVolumeResourceWithReservation(50, "data", id, mesos.Volume_RW.Enum(), "yangd", "dd"),
-				}),
-			}, &mesos.Filters{})
+			//driver.AcceptOffers([]*mesos.OfferID{offer.Id}, []*mesos.Offer_Operation{
+			//	util.NewReserveOperation([]*mesos.Resource{
+			//		util.NewScalarResourceWithReservation("disk", 50, "dd", "yang"),
+			//	}),
+			//}, &mesos.Filters{})
 
 			count++
+			driver.DeclineOffer(offer.Id, &mesos.Filters{})
 		} else {
 			driver.DeclineOffer(offer.Id, &mesos.Filters{})
 		}

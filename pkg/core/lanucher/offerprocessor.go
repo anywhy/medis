@@ -26,13 +26,13 @@ func NewOfferProcessor(client models.Client) *OfferProcessor {
 }
 
 func (o *OfferProcessor) ProcessOffer(driver sched.SchedulerDriver, offer *mesos.Offer) {
-	if ins, taks, offerOps := o.matacher.MatchOffer(offer); taks != nil {
-		if o.AcceptOffers(driver, offer.Id, offerOps) {
-			driver.LaunchTasks([]*mesos.OfferID{offer.Id}, taks, &mesos.Filters{})
-			return
-		}
+	_, tasks, offerOps := o.matacher.MatchOffer(offer)
+	if offerOps != nil {
+		o.AcceptOffers(driver, offer.Id, offerOps)
+	}
 
-		o.RevertTasks(ins, taks)
+	if tasks != nil {
+		driver.LaunchTasks([]*mesos.OfferID{offer}, tasks, &mesos.Filters{})
 	}
 
 	o.declineOffer(driver, offer.Id)
@@ -45,10 +45,11 @@ func (o *OfferProcessor) declineOffer(driver sched.SchedulerDriver, offerId *mes
 	}
 }
 
-func (o *OfferProcessor) AcceptOffers(driver sched.SchedulerDriver, offerId *mesos.OfferID, offerOp []*mesos.Offer_Operation) bool {
-	_, err := driver.AcceptOffers([]*mesos.OfferID{offerId}, offerOp, &mesos.Filters{RefuseSeconds: proto.Float64(0)})
-
-	return nil == err
+func (o *OfferProcessor) AcceptOffers(driver sched.SchedulerDriver, offerId *mesos.OfferID, offerOp []*mesos.Offer_Operation) {
+	stat, err := driver.AcceptOffers([]*mesos.OfferID{offerId}, offerOp, &mesos.Filters{RefuseSeconds: proto.Float64(0)})
+	if err != nil {
+		log.WarnErrorf(err, "AcceptOffers error, offerId:%v, dirver status: %v", offerId.GetValue(), stat.Enum().String())
+	}
 }
 
 func (o *OfferProcessor) RevertTasks(ins *instance.Instance, tasks []*mesos.TaskInfo) {

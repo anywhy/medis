@@ -2,6 +2,7 @@ package state
 
 type AppDefinition struct {
 	Id        string            `json:"id"`
+	Type      string            `json:"type"`
 	Cmd       string            `json:"cmd"`
 	Cpus      float64           `json:"cpus"`
 	Mem       float64           `json:"mem"`

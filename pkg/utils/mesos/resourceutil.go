@@ -25,7 +25,22 @@ func getOfferScalar(offer *mesos.Offer, name string) float64 {
 	return value
 }
 
-func GetOfferCpu(offer *mesos.Offer) float64  {
+func GetEffectivePorts(offer *mesos.Offer) map[int]bool {
+	var portMap = make(map[int]bool)
+
+	resources := getOfferResources(offer, resource.PORTS)
+	for _, res := range resources {
+		for _, rang := range res.Ranges.Range {
+			for v := rang.GetEnd(); v <= rang.GetEnd(); v++ {
+				portMap[v] = true
+			}
+		}
+	}
+
+	return portMap
+}
+
+func GetOfferCpu(offer *mesos.Offer) float64 {
 
 	return getOfferScalar(offer, resource.CPUS)
 }
@@ -35,7 +50,7 @@ func GetOfferMem(offer *mesos.Offer) float64 {
 	return getOfferScalar(offer, resource.MEM)
 }
 
-func GetOfferDisk(offer *mesos.Offer) float64  {
+func GetOfferDisk(offer *mesos.Offer) float64 {
 
 	return getOfferScalar(offer, resource.DISK)
 }
